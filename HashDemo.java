@@ -20,7 +20,6 @@ public class HashDemo {
     public static void main(String[] args) throws NoSuchAlgorithmException {
         Scanner sc = new Scanner(System.in);
 
-        // ---- Часть 1: хеш-таблица (телефонный справочник) ----
         Map<String, String> phoneBook = new HashMap<>();
         phoneBook.put("Иван", "+7-900-111-22-33");
         phoneBook.put("Мария", "+7-900-444-55-66");
@@ -40,7 +39,7 @@ public class HashDemo {
             System.out.println(e.getKey() + " -> " + e.getValue());
         }
 
-        String savedHash = sha256("qwerty123"); // храним только хеш, а не сам пароль
+        String savedHash = sha256("qwerty123");
 
         System.out.print("\nВведите пароль: ");
         String password = sc.nextLine();
