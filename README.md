@@ -1,1 +1,1 @@
-# algoritmandstruk
+# Тут ктшки по алгоритмам
