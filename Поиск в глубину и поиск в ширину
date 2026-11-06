@@ -1,0 +1,137 @@
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Deque;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Queue;
+import java.util.Set;
+
+public class GraphSearch {
+    private final Map<String, List<String>> adjacency = new LinkedHashMap<>();
+
+    public void addVertex(String v) {
+        adjacency.computeIfAbsent(v, k -> new ArrayList<>());
+    }
+
+    public void addEdge(String a, String b) {
+        addVertex(a);
+        addVertex(b);
+        adjacency.get(a).add(b);
+        adjacency.get(b).add(a);
+    }
+
+    public List<String> dfs(String start) {
+        List<String> order = new ArrayList<>();
+        if (!adjacency.containsKey(start)) {
+            return order;
+        }
+        dfsVisit(start, new HashSet<>(), order);
+        return order;
+    }
+
+    private void dfsVisit(String v, Set<String> visited, List<String> order) {
+        visited.add(v);
+        order.add(v);
+        for (String next : adjacency.get(v)) {
+            if (!visited.contains(next)) {
+                dfsVisit(next, visited, order);
+            }
+        }
+    }
+
+    public List<String> dfsIterative(String start) {
+        List<String> order = new ArrayList<>();
+        if (!adjacency.containsKey(start)) {
+            return order;
+        }
+        Set<String> visited = new HashSet<>();
+        Deque<String> stack = new ArrayDeque<>();
+        stack.push(start);
+        while (!stack.isEmpty()) {
+            String v = stack.pop();
+            if (!visited.add(v)) {
+                continue;
+            }
+            order.add(v);
+            List<String> neighbors = adjacency.get(v);
+            for (int i = neighbors.size() - 1; i >= 0; i--) {
+                if (!visited.contains(neighbors.get(i))) {
+                    stack.push(neighbors.get(i));
+                }
+            }
+        }
+        return order;
+    }
+
+    public List<String> bfs(String start) {
+        List<String> order = new ArrayList<>();
+        if (!adjacency.containsKey(start)) {
+            return order;
+        }
+        Set<String> visited = new HashSet<>();
+        Queue<String> queue = new LinkedList<>();
+        visited.add(start);
+        queue.add(start);
+        while (!queue.isEmpty()) {
+            String v = queue.poll();
+            order.add(v);
+            for (String next : adjacency.get(v)) {
+                if (visited.add(next)) {
+                    queue.add(next);
+                }
+            }
+        }
+        return order;
+    }
+
+    public List<String> shortestPath(String from, String to) {
+        if (!adjacency.containsKey(from) || !adjacency.containsKey(to)) {
+            return Collections.emptyList();
+        }
+        Map<String, String> parent = new LinkedHashMap<>();
+        Queue<String> queue = new LinkedList<>();
+        parent.put(from, null);
+        queue.add(from);
+        while (!queue.isEmpty()) {
+            String v = queue.poll();
+            if (v.equals(to)) {
+                break;
+            }
+            for (String next : adjacency.get(v)) {
+                if (!parent.containsKey(next)) {
+                    parent.put(next, v);
+                    queue.add(next);
+                }
+            }
+        }
+        if (!parent.containsKey(to)) {
+            return Collections.emptyList();
+        }
+        LinkedList<String> path = new LinkedList<>();
+        for (String v = to; v != null; v = parent.get(v)) {
+            path.addFirst(v);
+        }
+        return path;
+    }
+
+    public static void main(String[] args) {
+        GraphSearch g = new GraphSearch();
+        g.addEdge("A", "B");
+        g.addEdge("A", "C");
+        g.addEdge("B", "D");
+        g.addEdge("B", "E");
+        g.addEdge("C", "F");
+        g.addEdge("E", "F");
+        g.addEdge("G", "H");
+
+        System.out.println("DFS (рекурсивный):   " + g.dfs("A"));
+        System.out.println("DFS (итеративный):   " + g.dfsIterative("A"));
+        System.out.println("BFS:                 " + g.bfs("A"));
+        System.out.println("Кратчайший путь A-F: " + g.shortestPath("A", "F"));
+        System.out.println("Путь A-H:            " + g.shortestPath("A", "H"));
+    }
+}
