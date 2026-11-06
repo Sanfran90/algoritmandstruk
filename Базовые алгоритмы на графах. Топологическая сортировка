@@ -1,0 +1,110 @@
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Queue;
+
+public class TopologicalSort {
+    private final Map<String, List<String>> adjacency = new LinkedHashMap<>();
+
+    public void addVertex(String v) {
+        adjacency.computeIfAbsent(v, k -> new ArrayList<>());
+    }
+
+    public void addEdge(String from, String to) {
+        addVertex(from);
+        addVertex(to);
+        adjacency.get(from).add(to);
+    }
+
+    public List<String> kahn() {
+        Map<String, Integer> inDegree = new HashMap<>();
+        for (String v : adjacency.keySet()) {
+            inDegree.putIfAbsent(v, 0);
+            for (String to : adjacency.get(v)) {
+                inDegree.merge(to, 1, Integer::sum);
+            }
+        }
+        Queue<String> queue = new ArrayDeque<>();
+        for (String v : adjacency.keySet()) {
+            if (inDegree.get(v) == 0) {
+                queue.add(v);
+            }
+        }
+        List<String> order = new ArrayList<>();
+        while (!queue.isEmpty()) {
+            String v = queue.poll();
+            order.add(v);
+            for (String to : adjacency.get(v)) {
+                if (inDegree.merge(to, -1, Integer::sum) == 0) {
+                    queue.add(to);
+                }
+            }
+        }
+        if (order.size() != adjacency.size()) {
+            throw new IllegalStateException("В графе есть цикл, топологическая сортировка невозможна");
+        }
+        return order;
+    }
+
+    public List<String> dfsSort() {
+        Map<String, Integer> state = new HashMap<>();
+        LinkedList<String> result = new LinkedList<>();
+        for (String v : adjacency.keySet()) {
+            if (!state.containsKey(v)) {
+                visit(v, state, result);
+            }
+        }
+        return result;
+    }
+
+    private void visit(String v, Map<String, Integer> state, LinkedList<String> result) {
+        state.put(v, 1);
+        for (String to : adjacency.get(v)) {
+            Integer s = state.get(to);
+            if (s == null) {
+                visit(to, state, result);
+            } else if (s == 1) {
+                throw new IllegalStateException("В графе есть цикл, топологическая сортировка невозможна");
+            }
+        }
+        state.put(v, 2);
+        result.addFirst(v);
+    }
+
+    public static void main(String[] args) {
+        TopologicalSort courses = new TopologicalSort();
+        courses.addEdge("Основы программирования", "ООП");
+        courses.addEdge("Основы программирования", "Алгоритмы");
+        courses.addEdge("Математика", "Алгоритмы");
+        courses.addEdge("ООП", "Базы данных");
+        courses.addEdge("Алгоритмы", "Машинное обучение");
+        courses.addEdge("Базы данных", "Веб-разработка");
+        courses.addEdge("ООП", "Веб-разработка");
+
+        System.out.println("Порядок изучения курсов (алгоритм Кана):");
+        List<String> order = courses.kahn();
+        for (int i = 0; i < order.size(); i++) {
+            System.out.println((i + 1) + ". " + order.get(i));
+        }
+
+        System.out.println();
+        System.out.println("Порядок на основе поиска в глубину:");
+        System.out.println(courses.dfsSort());
+
+        TopologicalSort cyclic = new TopologicalSort();
+        cyclic.addEdge("A", "B");
+        cyclic.addEdge("B", "C");
+        cyclic.addEdge("C", "A");
+
+        System.out.println();
+        try {
+            cyclic.kahn();
+        } catch (IllegalStateException e) {
+            System.out.println("Граф с циклом: " + e.getMessage());
+        }
+    }
+}
