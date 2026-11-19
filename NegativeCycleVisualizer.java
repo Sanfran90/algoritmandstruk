@@ -10,7 +10,6 @@ public class NegativeCycleVisualizer extends JFrame {
     static final String[] V = {"A", "B", "C", "D", "E", "F"};
     static final int N = V.length;
 
-    // {откуда, куда, вес} - веса можно менять
     static final int[][] EDGES = {
             {0, 1, 1},
             {1, 3, -2},
@@ -95,7 +94,6 @@ public class NegativeCycleVisualizer extends JFrame {
         right.setBorder(BorderFactory.createEmptyBorder(40, 0, 0, 10));
         right.add(sp, BorderLayout.NORTH);
 
-        // Кнопки и статус
         JPanel buttons = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 5));
         buttons.add(prev);
         buttons.add(next);
@@ -191,13 +189,13 @@ public class NegativeCycleVisualizer extends JFrame {
             for (int i = 0; i < N; i++) neg[i] = d[i][i] < 0;
             int curK = (step >= 1) ? step - 1 : -1;
 
-            // рёбра
+            
             for (int[] e : EDGES) {
                 boolean red = neg[e[0]] && neg[e[1]];
                 drawEdge(g, POS[e[0]], POS[e[1]], e[2], red);
             }
 
-            // вершины
+            
             g.setFont(new Font("SansSerif", Font.BOLD, 18));
             for (int i = 0; i < N; i++) {
                 Color fill = neg[i] ? new Color(240, 150, 150)
@@ -212,7 +210,7 @@ public class NegativeCycleVisualizer extends JFrame {
                         POS[i].y + fm.getAscent() / 2 - 2);
             }
 
-            // легенда
+            
             g.setFont(new Font("SansSerif", Font.PLAIN, 12));
             g.setColor(Color.GRAY);
             g.drawString("оранжевая - текущая вершина k", 10, getHeight() - 28);
